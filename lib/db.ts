@@ -49,7 +49,14 @@ export async function connectToDB(){
     if(!cached.prom){
         //if there is no promise(i.e null, not rejected or pending(on the way) or resolved) in cached it means there's no connection as well! 
         //so we have to connect the database and send that connection promise.
-        cached.prom = mongoose.connect(MONGODB_URI).then(()=>mongoose.connection) //on fulfillment this promise will return the conenction.
+
+        const opts = {//these options decide which plan of mongo are you using. we'll use free plan so we don't need to pass anything.
+            bufferCommands: true,
+            maxPoolSize: 10 //n.o of databases used.
+            //these are for pro subscription, if no pro subscription then don't pass opts.
+        }
+
+        cached.prom = mongoose.connect(MONGODB_URI,opts).then(()=>mongoose.connection) //on fulfillment this promise will return the conenction.
     }
 
     try {//
@@ -59,4 +66,10 @@ export async function connectToDB(){
         cached.prom = null;
         throw error;
     }
+
+    return cached.conn;//return the connection.
 }
+//now our models and database are ready!!!
+//now we do authentication in nextjs. we can use clerk, passportjs or nextauth. we'll use nextauth.
+//see nextauth documentation. then go to ts.
+// [...nextauthjs], we also need to give types to nextauth in declaration file.
